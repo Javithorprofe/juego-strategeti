@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Strategeti</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<!-- Firebase SDK para modo online -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
   :root {
     --sand: #c8a96e;
@@ -694,6 +697,71 @@
     padding: 28px 32px;
     text-align: left;
   }
+  /* Bug report card */
+  .bug-card {
+    max-width: 600px;
+    padding: 22px 24px;
+    text-align: left;
+  }
+  .bug-card textarea {
+    width: 100%;
+    min-height: 220px;
+    max-height: 50vh;
+    background: rgba(0,0,0,0.4);
+    color: var(--sand-light);
+    border: 1px solid rgba(212,160,23,0.3);
+    border-radius: 6px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    resize: vertical;
+  }
+  /* Resultados de partidas */
+  .results-card {
+    max-width: 560px;
+    padding: 22px 24px;
+    text-align: left;
+  }
+  .results-list {
+    max-height: 60vh;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(212,160,23,0.15);
+    border-radius: 6px;
+    padding: 4px;
+  }
+  .results-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(212,160,23,0.08);
+    font-size: 0.8rem;
+  }
+  .results-row:last-child { border-bottom: none; }
+  .results-emoji { font-size: 1.4rem; }
+  .results-info { color: var(--sand-light); }
+  .results-date { font-size: 0.7rem; color: var(--sand); opacity: 0.7; }
+  .results-winner {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .results-winner.p1 { background: rgba(212,184,150,0.2); color: var(--cream-piece); }
+  .results-winner.p2 { background: rgba(90,170,82,0.2); color: var(--green-light); }
+  .results-empty {
+    text-align: center;
+    color: var(--sand);
+    font-style: italic;
+    padding: 20px;
+    opacity: 0.6;
+  }
+
   .info-card .legend {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -1411,6 +1479,93 @@
       padding: 0 0 4px;
     }
   }
+
+  /* ── LOBBY ONLINE ── */
+  .lobby-input {
+    width: 100%;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(212,160,23,0.3);
+    color: var(--ivory);
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 10px 14px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .lobby-input:focus {
+    border-color: var(--gold);
+    background: rgba(212,160,23,0.08);
+  }
+  .lobby-code-input {
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  .code-box-strategeti {
+    background: rgba(212,160,23,0.1);
+    border: 2px dashed var(--gold);
+    border-radius: 12px;
+    padding: 20px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s;
+    width: 100%;
+    max-width: 320px;
+  }
+  .code-box-strategeti:active { transform: scale(0.97); }
+  .code-lbl-s {
+    font-size: 0.75rem;
+    color: var(--sand);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .code-val-s {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 10px;
+    font-family: 'Cinzel', serif;
+    user-select: all;
+  }
+  .code-hint-s {
+    font-size: 0.7rem;
+    color: var(--sand-dark);
+    margin-top: 6px;
+  }
+  /* Indicador "está pensando" online (anima puntos) */
+  .opp-thinking::after {
+    content: '';
+    display: inline-block;
+    width: 1.4em;
+    text-align: left;
+    animation: opp-dots 1.4s steps(4, end) infinite;
+  }
+  @keyframes opp-dots {
+    0%   { content: '.'; }
+    25%  { content: '..'; }
+    50%  { content: '...'; }
+    75%  { content: '....'; }
+    100% { content: '.'; }
+  }
+  .opp-thinking::after { content: '...'; }
+  /* Banner revancha online */
+  .rematch-info {
+    background: rgba(61,143,163,0.15);
+    border: 1px solid var(--river-light);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 8px auto 0;
+    color: #aedce8;
+    font-size: 0.88rem;
+    max-width: 360px;
+    display: none;
+    text-align: center;
+  }
+  .rematch-info.show { display: block; }
 </style>
 </head>
 <body>
@@ -1438,6 +1593,11 @@
           <span class="menu-opt-emoji">🎓</span>
           <span class="menu-opt-label">Entrenamiento</span>
           <span class="menu-opt-sub">Undo, ambos colores</span>
+        </button>
+        <button class="menu-opt" id="btn-vs-online" onclick="setMode('online')" style="grid-column: 1 / -1;">
+          <span class="menu-opt-emoji">🌐</span>
+          <span class="menu-opt-label">Online — 2 jugadores</span>
+          <span class="menu-opt-sub">Reta a un amigo por código de sala</span>
         </button>
       </div>
     </div>
@@ -1469,7 +1629,91 @@
 
     <div class="menu-actions">
       <button class="btn btn-primary btn-large" onclick="startGame()">▶ Empezar partida</button>
+      <button class="btn" id="btn-resume" onclick="resumeGame()" style="display:none">↻ Continuar partida</button>
       <button class="btn" onclick="toggleInfo(true)">ℹ️ Cómo se juega</button>
+      <button class="btn" onclick="toggleResults(true)">📊 Resultados</button>
+      <button class="btn" onclick="openAjustes()">⚙️ Ajustes (nick online)</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOBBY ONLINE -->
+<div class="menu-screen" id="lobby-screen" style="display:none">
+  <div class="menu-card">
+    <div class="header">
+      <div class="title" style="font-size:clamp(1.6rem,5vw,2.6rem)">🌐 Jugar Online</div>
+      <div class="subtitle">Crea sala o únete con código</div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Tu nick</div>
+      <input class="lobby-input" id="lobby-nick" maxlength="14" placeholder="Tu nombre">
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Tablero (lo elige quien crea la sala)</div>
+      <div class="menu-options">
+        <button class="menu-opt" id="lobby-basic" onclick="setLobbyBoard('basic')">
+          <span class="menu-opt-emoji">🟦</span>
+          <span class="menu-opt-label">Básico</span>
+          <span class="menu-opt-sub">Esquinas bloqueadas</span>
+        </button>
+        <button class="menu-opt" id="lobby-expert" onclick="setLobbyBoard('expert')">
+          <span class="menu-opt-emoji">🟥</span>
+          <span class="menu-opt-label">Experto</span>
+          <span class="menu-opt-sub">Centro bloqueado</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-actions">
+      <button class="btn btn-primary btn-large" onclick="onCreateRoom()">➕ Crear sala</button>
+
+      <div class="menu-section-title" style="margin-top:10px">¿Te pasaron un código?</div>
+      <input class="lobby-input lobby-code-input" id="lobby-code" maxlength="6" placeholder="ABCD12" autocomplete="off">
+      <button class="btn" onclick="onJoinRoom()">🔑 Unirme a la sala</button>
+
+      <div id="lobby-error" style="color:#ff8080; font-size:0.9rem; min-height:1.2em; margin-top:6px"></div>
+
+      <button class="btn" onclick="backFromLobby()" style="margin-top:8px">← Volver</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANTALLA DE ESPERA -->
+<div class="menu-screen" id="wait-screen" style="display:none">
+  <div class="menu-card">
+    <div class="header">
+      <div class="title" style="font-size:clamp(1.6rem,5vw,2.6rem)">⏳ Esperando rival</div>
+      <div class="subtitle">Comparte este código</div>
+    </div>
+
+    <div class="menu-section" style="align-items:center;">
+      <div class="code-box-strategeti" onclick="copyRoomCode()">
+        <div class="code-lbl-s">Código de sala</div>
+        <div class="code-val-s" id="wait-code-val">------</div>
+        <div class="code-hint-s">Toca para copiar</div>
+      </div>
+      <div id="wait-status" style="color:var(--sand); margin-top:10px; font-style:italic;">Esperando a que entre el rival...</div>
+    </div>
+
+    <div class="menu-actions">
+      <button class="btn" onclick="cancelRoom()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJUSTES -->
+<div class="overlay" id="ajustes-overlay" onclick="if(event.target===this) closeAjustes()">
+  <div class="overlay-card">
+    <div class="overlay-title" style="font-size:1.3rem; margin-bottom:14px;">⚙️ Ajustes</div>
+    <div style="text-align:left; margin-bottom:10px;">
+      <div style="color:var(--sand-light); font-size:0.85rem; margin-bottom:6px;">Tu nick para partidas online:</div>
+      <input class="lobby-input" id="ajustes-nick" maxlength="14" placeholder="Tu nombre">
+    </div>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px;">
+      <button class="btn btn-primary" onclick="saveAjustes()">Guardar</button>
+      <button class="btn" onclick="closeAjustes()">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1480,7 +1724,10 @@
   <div class="game-header">
     <button class="btn-icon" onclick="backToMenu()" title="Volver al menú">← Menú</button>
     <div class="title-small">STRATEGETI</div>
-    <button class="btn-icon" onclick="toggleInfo(true)" title="Reglas">ℹ️</button>
+    <div style="display:flex; gap:6px;">
+      <button class="btn-icon" onclick="openBugReport()" title="Reportar bug">🐞</button>
+      <button class="btn-icon" onclick="toggleInfo(true)" title="Reglas">ℹ️</button>
+    </div>
   </div>
 
   <!-- Status -->
@@ -1549,9 +1796,12 @@
     </div>
   </div>
 
+  <!-- Banner de revancha (solo modo online) -->
+  <div class="rematch-info" id="rematch-info"></div>
+
   <!-- Controls -->
   <div class="controls">
-    <button class="btn btn-primary" onclick="resetGame()">Reiniciar partida</button>
+    <button class="btn btn-primary" id="btn-reset" onclick="onResetClick()">Reiniciar partida</button>
     <button class="btn" id="btn-undo" onclick="undoLastMove()" style="display:none">↶ Deshacer</button>
     <button class="btn" id="btn-cancel" onclick="cancelSelection()" style="display:none">Cancelar</button>
   </div>
@@ -1590,6 +1840,34 @@
       <p><b>Tableros:</b> en el fácil no se pueden sacar piezas en las 4 esquinas; en el difícil no se pueden sacar en las 4 casillas centrales (sí se puede llegar a ellas moviéndose).</p>
     </div>
     <button class="btn btn-primary" onclick="toggleInfo(false)">Cerrar</button>
+  </div>
+</div>
+
+<!-- Bug report modal -->
+<div class="overlay" id="bug-overlay" onclick="if(event.target===this) toggleBug(false)">
+  <div class="overlay-card bug-card">
+    <div class="overlay-title" style="font-size:1.2rem; margin-bottom:8px;">Reportar bug</div>
+    <p style="color:var(--sand-light); font-size:0.85rem; margin-bottom:10px;">
+      Copia este texto y envíalo por donde prefieras (WhatsApp, email…).
+      Incluye el estado del tablero, el historial y datos del navegador.
+    </p>
+    <textarea id="bug-text" readonly></textarea>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
+      <button class="btn btn-primary" id="bug-copy-btn" onclick="copyBugReport()">📋 Copiar al portapapeles</button>
+      <button class="btn" onclick="toggleBug(false)">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Resultados de partidas terminadas -->
+<div class="overlay" id="results-overlay" onclick="if(event.target===this) toggleResults(false)">
+  <div class="overlay-card results-card">
+    <div class="overlay-title" style="font-size:1.2rem; margin-bottom:10px;">📊 Historial de partidas</div>
+    <div id="results-list" class="results-list"></div>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
+      <button class="btn" onclick="clearAllResults()">🗑 Borrar historial</button>
+      <button class="btn btn-primary" onclick="toggleResults(false)">Cerrar</button>
+    </div>
   </div>
 </div>
 
@@ -1652,6 +1930,25 @@ let snapshots = [];     // pila de estados anteriores para Deshacer
 let hoverMoves = [];    // celdas previsualizadas al pasar el ratón
 let hoverFrom = null;   // {r,c} pieza sobre la que se está haciendo hover
 let reviewIndex = null; // índice del historial siendo revisado, o null
+
+// ── ESTADO MODO ONLINE ──
+let myPlayerNum     = 0;       // 1 (creador, crema) o 2 (joiner, verde)
+let onlineMyNick    = '';
+let onlineRivalNick = '';
+let onlineRoomCode  = '';
+let onlineRoomRef   = null;
+let onlineActionsRef= null;
+let onlineActionsListener = null;
+let onlineRoomListener    = null;
+let lastSeqApplied  = 0;       // última acción remota aplicada
+let applyingRemote  = false;   // flag: estamos reproduciendo una acción remota
+let lobbyBoardMode  = 'basic'; // tablero elegido en el lobby al crear sala
+let pendingRematch  = { 1:false, 2:false };
+
+// Detecta dispositivos sin ratón (móvil/táctil). Usado para desactivar el hover-preview
+// que en iOS Safari y otros móviles destruía el DOM antes del click y "perdía" la jugada.
+const isTouchDevice = (typeof window !== 'undefined') &&
+  (window.matchMedia && window.matchMedia('(hover: none)').matches || ('ontouchstart' in window));
 
 // ============================================================
 // INIT
@@ -1955,6 +2252,11 @@ function getGazelleMoves(startR, startC, b, moves) {
 // ============================================================
 function executeEnter(type, row, col) {
   if(animating) return;
+  // ── MODO ONLINE: enviar acción si es local, no reproducir aquí ──
+  if(gameMode==='online' && !applyingRemote) {
+    sendOnlineAction({ kind:'enter', type, row, col });
+    return;
+  }
   animating = true;
   pushSnapshot();
   const mover = currentPlayer;
@@ -2173,6 +2475,11 @@ function playMoveAnimated(fromR, fromC, move, mover) {
 }
 
 function executeMove(fromR, fromC, move) {
+  // ── MODO ONLINE: enviar acción si es local ──
+  if(gameMode==='online' && !applyingRemote) {
+    sendOnlineAction({ kind:'move', fromR, fromC, move });
+    return;
+  }
   playMoveAnimated(fromR, fromC, move, currentPlayer);
 }
 
@@ -2293,20 +2600,41 @@ function checkWinAndNextTurn() {
     triggerAI();
   }
   updateUndoButton();
+  // No guardamos partidas online en localStorage (la sala es la fuente de verdad)
+  if(gameMode !== 'online') saveGame();
 }
 
 function getHintText() {
   if(currentPlayer===P2 && gameMode==='ai') return 'La IA está pensando...';
+  if(gameMode==='online') {
+    if(currentPlayer === myPlayerNum) {
+      return 'Tu turno: coloca un animal o mueve uno tuyo.';
+    } else {
+      const nick = onlineRivalNick || 'Rival';
+      return `${nick} está pensando...`;
+    }
+  }
   return 'Haz clic en una casilla para colocar un animal, o en un animal tuyo para moverlo.';
 }
 
 function showWinner(player, reason) {
-  const name = player===P1 ? '🟤 Crema' : (gameMode==='ai' && player===P2 ? '🤖 IA' : '🟢 Verde');
+  let name;
+  if(gameMode==='online') {
+    if(player === myPlayerNum) name = '🎉 ' + (onlineMyNick || 'Tú');
+    else                       name = '😢 ' + (onlineRivalNick || 'Rival');
+  } else {
+    name = player===P1 ? '🟤 Crema' : (gameMode==='ai' && player===P2 ? '🤖 IA' : '🟢 Verde');
+  }
   document.getElementById('ov-title').textContent = `¡${name} gana!`;
   document.getElementById('ov-reason').textContent = `Por ${reason}`;
   document.getElementById('ov-emoji').textContent = player===P1 ? '🏆' : (gameMode==='ai' ? '🤖' : '🏆');
   document.getElementById('overlay').classList.add('show');
-  launchConfetti();
+  // En online, solo lanzar confetti si ganaste tú
+  if(gameMode !== 'online' || player === myPlayerNum) launchConfetti();
+  if(gameMode !== 'online') {
+    saveResult(player, reason);
+    clearSavedGame();
+  }
 }
 
 function launchConfetti(count = 140) {
@@ -2343,6 +2671,8 @@ function clearConfetti() {
 function onCellClick(r, c) {
   if(gameOver || aiThinking || animating) return;
   if(gameMode==='ai' && currentPlayer===P2) return;
+  // En online: ignorar si no es mi turno
+  if(gameMode==='online' && currentPlayer !== myPlayerNum) return;
 
   const clickedPiece = board[r][c];
 
@@ -2758,6 +3088,8 @@ function setMode(mode) {
   document.getElementById('btn-vs-ai').classList.toggle('active', mode==='ai');
   document.getElementById('btn-vs-human').classList.toggle('active', mode==='human');
   document.getElementById('btn-vs-training').classList.toggle('active', mode==='training');
+  const btnOnline = document.getElementById('btn-vs-online');
+  if (btnOnline) btnOnline.classList.toggle('active', mode==='online');
   document.getElementById('diff-section').style.display = mode==='ai' ? 'flex' : 'none';
 }
 
@@ -2775,6 +3107,11 @@ function setBoardMode(mode) {
 }
 
 function startGame() {
+  // Modo online: ir al lobby en vez de iniciar partida directamente
+  if(gameMode==='online') {
+    openOnlineLobby();
+    return;
+  }
   // Nombre del oponente según modo
   const p2name = document.querySelector('#info-p2 .player-name');
   if(gameMode==='ai') p2name.textContent = '🤖 IA';
@@ -2787,6 +3124,7 @@ function startGame() {
 }
 
 function backToMenu() {
+  updateResumeButton();
   // Cierra overlays si están abiertos
   document.getElementById('info-overlay').classList.remove('show');
   document.getElementById('picker-overlay').classList.remove('show');
@@ -3009,6 +3347,7 @@ function updateUndoButton() {
 // HOVER PREVIEW
 // ============================================================
 function onCellHover(r, c) {
+  if(isTouchDevice) return; // en táctil el hover destruía el DOM antes del click
   if(gameOver || aiThinking || animating) return;
   if(selectedCell || placingType) return; // ya hay selección activa
   if(gameMode==='ai' && currentPlayer===P2) return;
@@ -3032,6 +3371,252 @@ function onCellLeave() {
 }
 
 // ============================================================
+// BUG REPORT
+// ============================================================
+function buildBugReport() {
+  const L = [];
+  L.push('=== STRATEGETI BUG REPORT ===');
+  L.push('Fecha: ' + new Date().toISOString());
+  L.push('URL: ' + location.href);
+  L.push('Navegador: ' + navigator.userAgent);
+  L.push('Viewport: ' + window.innerWidth + 'x' + window.innerHeight + ' (DPR ' + (window.devicePixelRatio||1) + ')');
+  L.push('Táctil detectado: ' + isTouchDevice);
+  L.push('');
+  L.push('Modo: ' + gameMode + (gameMode==='ai' ? ' (depth ' + aiDepth + ')' : ''));
+  L.push('Tablero: ' + boardMode);
+  L.push('Turno actual: P' + currentPlayer + (currentPlayer===P1 ? ' (Crema)' : ' (Verde/IA)'));
+  L.push('GameOver: ' + gameOver);
+  L.push('');
+  L.push('TABLERO (mayúsculas=P2, minúsculas=P1):');
+  L.push('   a b c d');
+  const T = {elephant:'E', lion:'L', gazelle:'G', zebra:'Z'};
+  for(let r=0;r<4;r++) {
+    let row = (r+1) + '  ';
+    for(let c=0;c<4;c++) {
+      const p = board[r][c];
+      if(!p) row += '. ';
+      else row += (p.player===P1 ? T[p.type].toLowerCase() : T[p.type]) + ' ';
+    }
+    L.push(row);
+  }
+  L.push('');
+  L.push('Capturas: P1=' + eliminated[P1] + '  P2=' + eliminated[P2]);
+  L.push('Mano P1: ' + JSON.stringify(hand[P1]));
+  L.push('Mano P2: ' + JSON.stringify(hand[P2]));
+  L.push('');
+  L.push('HISTORIAL (' + history.length + ' jugadas):');
+  history.forEach((h, i) => {
+    const text = (h.text||'').replace(/<[^>]+>/g, '');
+    L.push('  ' + (i+1) + '. [P' + h.player + '] ' + text);
+  });
+  L.push('');
+  L.push('--- JSON COMPLETO (para reproducir) ---');
+  L.push(JSON.stringify({
+    board, hand, eliminated, currentPlayer,
+    gameMode, boardMode, aiDepth, gameOver,
+    history: history.map(h => ({player:h.player, text:(h.text||'').replace(/<[^>]+>/g,''), hl:h.hl}))
+  }));
+  return L.join('\n');
+}
+
+function openBugReport() {
+  document.getElementById('bug-text').value = buildBugReport();
+  document.getElementById('bug-overlay').classList.add('show');
+}
+
+function toggleBug(show) {
+  document.getElementById('bug-overlay').classList.toggle('show', show);
+}
+
+function copyBugReport() {
+  const textarea = document.getElementById('bug-text');
+  textarea.select();
+  textarea.setSelectionRange(0, 999999); // iOS
+  const btn = document.getElementById('bug-copy-btn');
+  const original = btn.textContent;
+  const success = () => {
+    btn.textContent = '✓ Copiado';
+    setTimeout(() => { btn.textContent = original; }, 1800);
+  };
+  const fail = () => {
+    btn.textContent = '⚠ No pudo copiar — selecciona y copia manual';
+    setTimeout(() => { btn.textContent = original; }, 2500);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textarea.value).then(success).catch(fail);
+  } else {
+    try { document.execCommand('copy'); success(); } catch(e) { fail(); }
+  }
+}
+
+// ============================================================
+// PERSISTENCIA: PARTIDA EN CURSO
+// ============================================================
+const SAVE_KEY = 'strategeti-save-v1';
+
+function saveGame() {
+  if(gameOver) return;
+  if(history.length === 0) return; // no guardar partidas sin jugadas
+  try {
+    const state = {
+      board, hand, eliminated, currentPlayer,
+      gameMode, boardMode, aiDepth,
+      history: history.map(h => ({player:h.player, text:h.text, hl:h.hl, boardAfter:h.boardAfter})),
+      lastMove, winningLine,
+      savedAt: Date.now()
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+  } catch(e) { /* localStorage no disponible/llena */ }
+}
+
+function loadSavedGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+
+function clearSavedGame() {
+  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+}
+
+function updateResumeButton() {
+  const btn = document.getElementById('btn-resume');
+  if(!btn) return;
+  const saved = loadSavedGame();
+  if(saved && saved.history && saved.history.length > 0) {
+    const moves = saved.history.length;
+    const when = new Date(saved.savedAt);
+    const modeLabel = saved.gameMode==='ai' ? 'vs IA'
+                      : saved.gameMode==='training' ? 'Entrenamiento' : '2 Jugadores';
+    btn.innerHTML = `↻ Continuar partida <span style="opacity:.7; font-size:.7rem; margin-left:6px;">(${modeLabel} · ${moves} jug · ${when.toLocaleString()})</span>`;
+    btn.style.display = 'inline-flex';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+function resumeGame() {
+  const s = loadSavedGame();
+  if(!s) return;
+  // Restaurar config
+  setMode(s.gameMode);
+  setBoardMode(s.boardMode);
+  if(s.aiDepth) setDiff(s.aiDepth);
+  // Restaurar estado
+  board = s.board;
+  hand = s.hand;
+  eliminated = s.eliminated;
+  currentPlayer = s.currentPlayer;
+  history = s.history || [];
+  lastMove = s.lastMove || null;
+  winningLine = s.winningLine || null;
+  gameOver = false;
+  snapshots = [];
+  selectedCell = null;
+  validMoves = [];
+  placingType = null;
+  hoverFrom = null;
+  hoverMoves = [];
+  pendingPlacement = null;
+  reviewIndex = null;
+  // Nombre P2
+  document.querySelector('#info-p2 .player-name').textContent =
+    gameMode==='ai' ? '🤖 IA' : gameMode==='training' ? '🟢 Verde (tú)' : '🟢 Verde';
+  // Cambiar a pantalla de juego
+  document.getElementById('menu-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'flex';
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('winner-peek').style.display = 'none';
+  document.getElementById('thinking-msg').style.display = 'none';
+  document.getElementById('ai-chip').classList.remove('is-thinking');
+  document.querySelectorAll('.ghost').forEach(g => g.remove());
+  clearConfetti();
+  renderBoard();
+  renderHistory();
+  updateStatus();
+  updateUndoButton();
+  // Si toca IA, dispararla
+  if(gameMode==='ai' && currentPlayer===P2) {
+    setTimeout(triggerAI, 200);
+  }
+}
+
+// ============================================================
+// HISTORIAL DE RESULTADOS
+// ============================================================
+const RESULTS_KEY = 'strategeti-results-v1';
+
+function loadResults() {
+  try {
+    const raw = localStorage.getItem(RESULTS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+
+function saveResult(winner, reason) {
+  try {
+    const all = loadResults();
+    all.unshift({
+      winner, reason,
+      mode: gameMode,
+      boardMode,
+      aiDepth: gameMode==='ai' ? aiDepth : null,
+      moves: history.length,
+      captures: { p1: eliminated[P1], p2: eliminated[P2] },
+      date: Date.now()
+    });
+    // Limita a 200 entradas para no inflar storage
+    if(all.length > 200) all.length = 200;
+    localStorage.setItem(RESULTS_KEY, JSON.stringify(all));
+  } catch(e) {}
+}
+
+function clearAllResults() {
+  if(!confirm('¿Borrar el historial de partidas terminadas? No se puede deshacer.')) return;
+  try { localStorage.removeItem(RESULTS_KEY); } catch(e) {}
+  renderResults();
+}
+
+function toggleResults(show) {
+  if(show) renderResults();
+  document.getElementById('results-overlay').classList.toggle('show', show);
+}
+
+function renderResults() {
+  const list = document.getElementById('results-list');
+  const all = loadResults();
+  if(!all.length) {
+    list.innerHTML = '<div class="results-empty">No hay partidas terminadas todavía.</div>';
+    return;
+  }
+  const modeName = m => m==='ai' ? '🤖 vs IA' : m==='training' ? '🎓 Entren.' : '👥 2 Jug.';
+  const boardName = b => b==='basic' ? 'Básico' : 'Experto';
+  const winnerLabel = (winner, mode) => {
+    if(winner===1) return 'CREMA';
+    if(mode==='ai') return 'IA';
+    return 'VERDE';
+  };
+  list.innerHTML = all.map(r => {
+    const d = new Date(r.date);
+    const winCls = r.winner===1 ? 'p1' : 'p2';
+    const win = winnerLabel(r.winner, r.mode);
+    return `
+      <div class="results-row">
+        <span class="results-emoji">${r.winner===1 ? '🟤' : (r.mode==='ai' ? '🤖' : '🟢')}</span>
+        <div class="results-info">
+          <div><b>${modeName(r.mode)}</b> · ${boardName(r.boardMode)}${r.aiDepth ? ' · prof ' + r.aiDepth : ''}</div>
+          <div class="results-date">${d.toLocaleString()} · ${r.moves} jugadas · capturas ${r.captures.p1}-${r.captures.p2}</div>
+          <div class="results-date" style="opacity:.9;">Motivo: ${r.reason}</div>
+        </div>
+        <span class="results-winner ${winCls}">${win}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============================================================
 // CLICK FUERA → DESELECCIONAR
 // ============================================================
 document.addEventListener('click', (e) => {
@@ -3039,7 +3624,9 @@ document.addEventListener('click', (e) => {
   // Si hay un modal abierto, no interferir
   const pickerOpen = document.getElementById('picker-overlay').classList.contains('show');
   const infoOpen = document.getElementById('info-overlay').classList.contains('show');
-  if(pickerOpen || infoOpen) return;
+  const bugOpen = document.getElementById('bug-overlay').classList.contains('show');
+  const resultsOpen = document.getElementById('results-overlay').classList.contains('show');
+  if(pickerOpen || infoOpen || bugOpen || resultsOpen) return;
   // Si no hay nada seleccionado, no hay que hacer nada
   if(!selectedCell && !placingType) return;
   // Si el clic ha sido dentro del tablero, lo gestiona onCellClick (stopPropagation)
@@ -3050,6 +3637,449 @@ document.addEventListener('click', (e) => {
   cancelSelection();
 });
 
+// ════════════════════════════════════════════════════════════
+// ███████   MODO ONLINE — FIREBASE REALTIME DATABASE   ███████
+// ════════════════════════════════════════════════════════════
+
+// ── 1. Inicialización Firebase ──
+const STRAT_FB_CONFIG = {
+  apiKey: "AIzaSyC8w5bcku6iK6gGCigjZ4RfA37Phr6Keuo",
+  authDomain: "juego-4-en-raya.firebaseapp.com",
+  databaseURL: "https://juego-4-en-raya-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "juego-4-en-raya",
+  storageBucket: "juego-4-en-raya.firebasestorage.app",
+  messagingSenderId: "370447733969",
+  appId: "1:370447733969:web:9c986257036f457a8721f0",
+  measurementId: "G-SCDK2W5VMV"
+};
+let stratFbDB = null;
+try {
+  // Si ya está inicializado en otra parte (improbable aquí), reutilizamos
+  if (!firebase.apps.length) firebase.initializeApp(STRAT_FB_CONFIG);
+  stratFbDB = firebase.database();
+} catch(e) {
+  console.error('Firebase no inicializó (Strategeti):', e);
+}
+
+// ── 2. Nick persistente ──
+const STRAT_NICK_KEY = 'strategeti_nick';
+function getStratNick() {
+  try { return localStorage.getItem(STRAT_NICK_KEY) || ''; } catch(e) { return ''; }
+}
+function setStratNick(v) {
+  try { localStorage.setItem(STRAT_NICK_KEY, v); } catch(e) {}
+}
+function defaultNick() {
+  return 'Jugador' + Math.floor(100 + Math.random() * 900);
+}
+
+// ── 3. Modal ajustes ──
+function openAjustes() {
+  document.getElementById('ajustes-nick').value = getStratNick();
+  document.getElementById('ajustes-overlay').classList.add('show');
+  setTimeout(() => document.getElementById('ajustes-nick').focus(), 50);
+}
+function closeAjustes() {
+  document.getElementById('ajustes-overlay').classList.remove('show');
+}
+function saveAjustes() {
+  const v = (document.getElementById('ajustes-nick').value || '').trim().slice(0,14);
+  if(v) setStratNick(v);
+  closeAjustes();
+}
+
+// ── 4. Lobby (crear/unirse) ──
+function setLobbyBoard(mode) {
+  lobbyBoardMode = mode;
+  document.getElementById('lobby-basic').classList.toggle('active', mode==='basic');
+  document.getElementById('lobby-expert').classList.toggle('active', mode==='expert');
+}
+
+function openOnlineLobby() {
+  if(!stratFbDB) { alert('Sin conexión a Firebase. Recarga la página.'); return; }
+  let nick = getStratNick();
+  if(!nick) { nick = defaultNick(); setStratNick(nick); }
+  document.getElementById('lobby-nick').value = nick;
+  document.getElementById('lobby-code').value = '';
+  document.getElementById('lobby-error').textContent = '';
+  setLobbyBoard(lobbyBoardMode || 'basic');
+  document.getElementById('menu-screen').style.display = 'none';
+  document.getElementById('lobby-screen').style.display = 'flex';
+}
+
+function backFromLobby() {
+  document.getElementById('lobby-screen').style.display = 'none';
+  document.getElementById('menu-screen').style.display = 'flex';
+}
+
+function lobbyError(msg) {
+  document.getElementById('lobby-error').textContent = msg;
+}
+
+function readLobbyNick() {
+  let n = (document.getElementById('lobby-nick').value || '').trim().slice(0,14);
+  if(!n) n = defaultNick();
+  setStratNick(n);
+  return n;
+}
+
+function genCode() {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let s = '';
+  for(let i=0;i<5;i++) s += chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+
+// ── 5. Crear sala ──
+async function onCreateRoom() {
+  const nick = readLobbyNick();
+  if(!stratFbDB) { lobbyError('Sin conexión.'); return; }
+  let code, tries = 0;
+  while(true) {
+    code = genCode();
+    try {
+      const snap = await stratFbDB.ref('strategeti_rooms/' + code).get();
+      if(!snap.exists()) break;
+    } catch(e) { lobbyError('Error de red: ' + e.message); return; }
+    if(++tries > 10) { lobbyError('No se pudo generar código. Reintenta.'); return; }
+  }
+  const init = {
+    boardMode: lobbyBoardMode,
+    players: { 1: { nick, joined: firebase.database.ServerValue.TIMESTAMP } },
+    status: 'waiting',
+    round: 1,
+    rematch: { 1:false, 2:false },
+    createdAt: firebase.database.ServerValue.TIMESTAMP,
+  };
+  try {
+    await stratFbDB.ref('strategeti_rooms/' + code).set(init);
+  } catch(e) { lobbyError('No se pudo crear sala: ' + e.message); return; }
+
+  onlineRoomCode  = code;
+  myPlayerNum     = 1;
+  onlineMyNick    = nick;
+  onlineRivalNick = '';
+  attachRoomListeners();
+
+  // Pantalla de espera
+  document.getElementById('lobby-screen').style.display = 'none';
+  document.getElementById('wait-screen').style.display = 'flex';
+  document.getElementById('wait-code-val').textContent = code;
+  document.getElementById('wait-status').textContent = 'Esperando a que entre el rival...';
+}
+
+// ── 6. Unirse a sala ──
+async function onJoinRoom() {
+  const nick = readLobbyNick();
+  const code = (document.getElementById('lobby-code').value || '').trim().toUpperCase();
+  if(!code || code.length < 4) { lobbyError('Introduce un código válido.'); return; }
+  if(!stratFbDB) { lobbyError('Sin conexión.'); return; }
+  let snap;
+  try { snap = await stratFbDB.ref('strategeti_rooms/' + code).get(); }
+  catch(e) { lobbyError('Error de red: ' + e.message); return; }
+  if(!snap.exists()) { lobbyError('No existe ninguna sala con ese código.'); return; }
+  const data = snap.val();
+  if(data.players && data.players[2]) { lobbyError('La sala ya está llena.'); return; }
+
+  try {
+    await stratFbDB.ref('strategeti_rooms/' + code).update({
+      'players/2': { nick, joined: firebase.database.ServerValue.TIMESTAMP },
+      'status': 'playing',
+    });
+  } catch(e) { lobbyError('No se pudo unir: ' + e.message); return; }
+
+  onlineRoomCode  = code;
+  myPlayerNum     = 2;
+  onlineMyNick    = nick;
+  onlineRivalNick = (data.players && data.players[1] && data.players[1].nick) || 'Rival';
+  // El tablero lo fija el creador
+  lobbyBoardMode  = data.boardMode || 'basic';
+  attachRoomListeners();
+  enterOnlineGame();
+}
+
+// ── 7. Listeners ──
+function attachRoomListeners() {
+  if(!onlineRoomCode) return;
+  onlineRoomRef = stratFbDB.ref('strategeti_rooms/' + onlineRoomCode);
+
+  // El creador limpia la sala si se desconecta
+  if(myPlayerNum === 1) {
+    try { onlineRoomRef.onDisconnect().remove(); } catch(e) {}
+  }
+
+  // Listener de la metadata de la sala
+  if(onlineRoomListener) onlineRoomRef.off('value', onlineRoomListener);
+  onlineRoomListener = onlineRoomRef.on('value', (snap) => {
+    const data = snap.val();
+    if(!data) {
+      // La sala se borró
+      if(gameMode === 'online') {
+        alert('La sala fue cerrada (el rival se desconectó).');
+        cleanupOnline();
+        forceBackToMenu();
+      }
+      return;
+    }
+    // Actualizar nick rival si entró
+    if(data.players) {
+      const rival = data.players[myPlayerNum === 1 ? 2 : 1];
+      if(rival && rival.nick) onlineRivalNick = rival.nick;
+    }
+    // Tablero
+    if(data.boardMode) {
+      lobbyBoardMode = data.boardMode;
+      boardMode = data.boardMode;
+    }
+    // Si estoy esperando y entró el rival → arrancar
+    if(myPlayerNum === 1 && data.status === 'playing' && data.players && data.players[2]
+       && document.getElementById('wait-screen').style.display !== 'none') {
+      enterOnlineGame();
+    }
+    // Actualizar banner revancha
+    if(gameMode === 'online' && gameOver) {
+      updateRematchBanner(data.rematch || { 1:false, 2:false });
+    }
+  });
+
+  // Listener de las acciones (move/enter/reset)
+  onlineActionsRef = stratFbDB.ref('strategeti_rooms/' + onlineRoomCode + '/actions');
+  if(onlineActionsListener) onlineActionsRef.off('child_added', onlineActionsListener);
+  onlineActionsListener = onlineActionsRef.on('child_added', (snap) => {
+    const action = snap.val();
+    if(!action || typeof action.seq !== 'number') return;
+    if(action.seq <= lastSeqApplied) return;        // ya aplicado
+    if(action.by === myPlayerNum) {
+      // Es mi propia acción (echo) — la ejecuto local si aún no la apliqué
+      lastSeqApplied = action.seq;
+      applyOnlineAction(action);
+      return;
+    }
+    lastSeqApplied = action.seq;
+    applyOnlineAction(action);
+  });
+}
+
+function copyRoomCode() {
+  if(!onlineRoomCode) return;
+  try {
+    navigator.clipboard.writeText(onlineRoomCode);
+    const el = document.getElementById('wait-code-val');
+    const original = el.textContent;
+    el.textContent = '¡COPIADO!';
+    setTimeout(() => el.textContent = original, 900);
+  } catch(e) {}
+}
+
+function cancelRoom() {
+  cleanupOnline();
+  document.getElementById('wait-screen').style.display = 'none';
+  document.getElementById('menu-screen').style.display = 'flex';
+}
+
+// ── 8. Arrancar pantalla de juego online ──
+function enterOnlineGame() {
+  gameMode = 'online';
+  // Etiquetas de jugadores con nick
+  const p1Name = document.querySelector('#info-p1 .player-name');
+  const p2Name = document.querySelector('#info-p2 .player-name');
+  const meNick = onlineMyNick || 'Tú';
+  const rvNick = onlineRivalNick || 'Rival';
+  if(myPlayerNum === 1) {
+    p1Name.textContent = '🟤 ' + meNick + ' (tú)';
+    p2Name.textContent = '🟢 ' + rvNick;
+  } else {
+    p1Name.textContent = '🟤 ' + rvNick;
+    p2Name.textContent = '🟢 ' + meNick + ' (tú)';
+  }
+  // Cambiar a pantalla de juego
+  document.getElementById('lobby-screen').style.display = 'none';
+  document.getElementById('wait-screen').style.display = 'none';
+  document.getElementById('menu-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'flex';
+  // Botón undo no aplica
+  document.getElementById('btn-undo').style.display = 'none';
+  document.getElementById('rematch-info').classList.remove('show');
+  // Cambiar texto del botón reset
+  document.getElementById('btn-reset').textContent = '🔄 Pedir revancha';
+  // Resetear estado y empezar
+  resetGame();
+  lastSeqApplied = 0;
+}
+
+// ── 9. Enviar acción al servidor (transaction para asignar seq) ──
+async function sendOnlineAction(payload) {
+  if(!onlineRoomRef) return;
+  // Construir la entrada con un seq incremental
+  const seqRef = onlineRoomRef.child('seq');
+  try {
+    const result = await seqRef.transaction(curr => (curr || 0) + 1);
+    const newSeq = result.snapshot.val();
+    const entry = {
+      seq: newSeq,
+      by: myPlayerNum,
+      ts: firebase.database.ServerValue.TIMESTAMP,
+      ...payload,
+    };
+    await onlineRoomRef.child('actions/' + newSeq).set(entry);
+  } catch(e) {
+    alert('Error enviando jugada: ' + e.message);
+  }
+}
+
+// ── 10. Aplicar acción remota (o eco de la propia) ──
+function applyOnlineAction(action) {
+  if(!action || !action.kind) return;
+  applyingRemote = true;
+  try {
+    if(action.kind === 'reset') {
+      // Reset de partida online (revancha)
+      resetGame();
+      // El turno inicial puede alternar según la ronda
+      if(typeof action.starter === 'number') {
+        currentPlayer = action.starter;
+        updateStatus();
+        renderBoard();
+        updateHint(getHintText());
+      }
+    } else if(action.kind === 'enter') {
+      // Validar que sea el turno del jugador correcto
+      if(currentPlayer !== action.by) return;
+      executeEnter(action.type, action.row, action.col);
+    } else if(action.kind === 'move') {
+      if(currentPlayer !== action.by) return;
+      const fromR = action.fromR, fromC = action.fromC, move = action.move;
+      executeMove(fromR, fromC, move);
+    }
+  } finally {
+    // Liberamos el flag tras un tick para no interferir con el setTimeout interno
+    setTimeout(() => { applyingRemote = false; }, 50);
+  }
+}
+
+// ── 11. Botón "Reiniciar" → en online pide revancha ──
+function onResetClick() {
+  if(gameMode === 'online') {
+    pedirRevancha();
+  } else {
+    resetGame();
+  }
+}
+
+async function pedirRevancha() {
+  if(!onlineRoomRef) return;
+  if(!gameOver) {
+    // Antes de terminar no se puede pedir revancha
+    if(!confirm('¿Salir de la partida? Se cerrará la sala.')) return;
+    cleanupOnline();
+    forceBackToMenu();
+    return;
+  }
+  try {
+    // Marcar mi voto
+    const upd = {};
+    upd['rematch/' + myPlayerNum] = true;
+    await onlineRoomRef.update(upd);
+    // Releer estado
+    const snap = await onlineRoomRef.get();
+    const data = snap.val();
+    if(!data) return;
+    const rmt = data.rematch || { 1:false, 2:false };
+    if(rmt[1] && rmt[2]) {
+      // Ambos quieren → resetear (el creador dispara el reset)
+      if(myPlayerNum === 1) {
+        const round = (data.round || 1) + 1;
+        const starter = (round % 2 === 1) ? 1 : 2; // alterna quién empieza
+        await onlineRoomRef.update({
+          rematch: { 1:false, 2:false },
+          round: round,
+          status: 'playing',
+        });
+        // Limpiar acciones antiguas y enviar el reset como acción seq
+        await onlineRoomRef.child('actions').remove();
+        await onlineRoomRef.update({ seq: 0 });
+        lastSeqApplied = 0;
+        // Enviar la acción de reset
+        await onlineRoomRef.child('actions/1').set({
+          seq: 1, by: myPlayerNum, kind: 'reset', starter: starter,
+          ts: firebase.database.ServerValue.TIMESTAMP,
+        });
+      }
+    }
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+function updateRematchBanner(rmt) {
+  const yo    = !!rmt[myPlayerNum];
+  const rival = !!rmt[myPlayerNum === 1 ? 2 : 1];
+  const el = document.getElementById('rematch-info');
+  if(yo && !rival) {
+    el.textContent = '⏳ Esperando a que el rival acepte la revancha...';
+    el.classList.add('show');
+  } else if(!yo && rival) {
+    el.textContent = '🔄 El rival quiere revancha — pulsa "Pedir revancha" para empezar.';
+    el.classList.add('show');
+  } else {
+    el.classList.remove('show');
+  }
+}
+
+// ── 12. Salir / limpiar ──
+async function cleanupOnline() {
+  if(onlineRoomRef) {
+    try { onlineRoomRef.onDisconnect().cancel(); } catch(e) {}
+    try {
+      if(myPlayerNum === 1) {
+        await onlineRoomRef.remove();
+      } else {
+        await onlineRoomRef.child('players/2').remove();
+        await onlineRoomRef.update({ status: 'waiting' });
+      }
+    } catch(e) {}
+    if(onlineRoomListener)    onlineRoomRef.off('value', onlineRoomListener);
+    if(onlineActionsListener && onlineActionsRef) onlineActionsRef.off('child_added', onlineActionsListener);
+  }
+  onlineRoomRef = null; onlineActionsRef = null;
+  onlineRoomListener = null; onlineActionsListener = null;
+  onlineRoomCode = ''; myPlayerNum = 0;
+  onlineMyNick = ''; onlineRivalNick = '';
+  lastSeqApplied = 0;
+  applyingRemote = false;
+}
+
+function forceBackToMenu() {
+  // Restablece gameMode al previo (por defecto ai) y vuelve al menú
+  gameMode = 'ai';
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('wait-screen').style.display = 'none';
+  document.getElementById('lobby-screen').style.display = 'none';
+  document.getElementById('menu-screen').style.display = 'flex';
+  // Restaurar texto del botón reset
+  document.getElementById('btn-reset').textContent = 'Reiniciar partida';
+  setMode('ai');
+}
+
+// Hook al botón "← Menú" original: si está en online, limpiamos la sala primero
+const __origBackToMenu = backToMenu;
+window.backToMenu = function() {
+  if(gameMode === 'online') {
+    if(!confirm('¿Salir de la sala? Se cerrará la partida online.')) return;
+    cleanupOnline().then(() => {
+      document.getElementById('btn-reset').textContent = 'Reiniciar partida';
+      __origBackToMenu();
+    });
+    return;
+  }
+  __origBackToMenu();
+};
+
+// Cierre de pestaña → limpiar sala si soy el creador
+window.addEventListener('beforeunload', () => {
+  if(onlineRoomRef && myPlayerNum === 1) {
+    try { onlineRoomRef.remove(); } catch(e) {}
+  }
+});
+
 // ============================================================
 // START
 // ============================================================
@@ -3057,6 +4087,8 @@ document.addEventListener('click', (e) => {
 setMode('ai');
 setDiff(4);
 setBoardMode('basic');
+setLobbyBoard('basic');
+updateResumeButton();
 // Y muestra el menú (el game-screen está oculto por defecto via style)
 </script>
 </body>
